@@ -1,0 +1,36 @@
+import requests
+
+# Fetch data from API
+url = "https://restcountries.com/v3.1/all"
+
+try:
+    response = requests.get(url)
+    countries = response.json()
+
+    print("=== Country Information Search ===")
+
+    while True:
+        search = input("\nEnter country name (or 'exit' to quit): ").lower()
+
+        if search == "exit":
+            print("Goodbye!")
+            break
+
+        found = False
+
+        for country in countries:
+            name = country["name"]["common"].lower()
+
+            if search in name:
+                found = True
+                print("\nCountry:", country["name"]["common"])
+                print("Capital:", country.get("capital", ["N/A"])[0])
+                print("Region:", country.get("region", "N/A"))
+                print("Population:", country.get("population", "N/A"))
+                print("-" * 40)
+
+        if not found:
+            print("No country found.")
+
+except Exception as e:
+    print("Error:", e)
