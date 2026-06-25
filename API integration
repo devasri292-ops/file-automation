@@ -1,36 +1,35 @@
 import requests
 
-# Fetch data from API
-url = "https://restcountries.com/v3.1/all"
+print("=== Country Information Search ===")
 
-try:
-    response = requests.get(url)
-    countries = response.json()
+while True:
+    country_name = input("\nEnter country name (or 'exit' to quit): ").strip()
 
-    print("=== Country Information Search ===")
+    if country_name.lower() == "exit":
+        print("Goodbye!")
+        break
 
-    while True:
-        search = input("\nEnter country name (or 'exit' to quit): ").lower()
+    url = f"https://restcountries.com/v3.1/name/{country_name}"
 
-        if search == "exit":
-            print("Goodbye!")
-            break
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
 
-        found = False
+        data = response.json()
+        country = data[0]
 
-        for country in countries:
-            name = country["name"]["common"].lower()
+        name = country["name"]["common"]
+        capital = country.get("capital", ["N/A"])[0]
+        region = country.get("region", "N/A")
+        population = country.get("population", "N/A")
 
-            if search in name:
-                found = True
-                print("\nCountry:", country["name"]["common"])
-                print("Capital:", country.get("capital", ["N/A"])[0])
-                print("Region:", country.get("region", "N/A"))
-                print("Population:", country.get("population", "N/A"))
-                print("-" * 40)
+        print("\nCountry:", name)
+        print("Capital:", capital)
+        print("Region:", region)
+        print("Population:", population)
 
-        if not found:
-            print("No country found.")
+    except requests.exceptions.HTTPError:
+        print("Country not found.")
 
-except Exception as e:
-    print("Error:", e)
+    except Exception as e:
+        print("Error:", e)

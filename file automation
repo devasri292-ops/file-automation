@@ -1,0 +1,79 @@
+import os
+import shutil
+import logging
+
+# Configure logging
+logging.basicConfig(
+    filename="file_organizer.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+# File categories
+FILE_TYPES = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif"],
+    "Documents": [".pdf", ".docx", ".txt", ".pptx", ".xlsx"],
+    "Videos": [".mp4", ".avi", ".mkv"],
+    "Audio": [".mp3", ".wav"]
+}
+
+def organize_files(folder_path):
+    try:
+        if not os.path.exists(folder_path):
+            raise FileNotFoundError("Folder does not exist!")
+
+        files = os.listdir(folder_path)
+
+        for file in files:
+            file_path = os.path.join(folder_path, file)
+
+            if os.path.isfile(file_path):
+
+                moved = False
+
+                for category, extensions in FILE_TYPES.items():
+                    if os.path.splitext(file)[1].lower() in extensions:
+
+                        category_path = os.path.join(folder_path, category)
+
+                        os.makedirs(category_path, exist_ok=True)
+
+                        shutil.move(
+                            file_path,
+                            os.path.join(category_path, file)
+                        )
+
+                        print(f"Moved: {file} -> {category}")
+                        logging.info(f"Moved {file} to {category}")
+
+                        moved = True
+                        break
+
+                if not moved:
+                    other_path = os.path.join(folder_path, "Others")
+                    os.makedirs(other_path, exist_ok=True)
+
+                    shutil.move(
+                        file_path,
+                        os.path.join(other_path, file)
+                    )
+
+                    print(f"Moved: {file} -> Others")
+                    logging.info(f"Moved {file} to Others")
+
+    except FileNotFoundError as e:
+        print("Error:", e)
+        logging.error(str(e))
+
+    except PermissionError:
+        print("Permission denied.")
+        logging.error("Permission denied.")
+
+    except Exception as e:
+        print("Unexpected Error:", e)
+        logging.error(str(e))
+
+
+# User Input
+folder = input("Enter folder path: ")
+organize_files(folder)
